@@ -6,39 +6,45 @@ using System.Text.RegularExpressions;
 
 public class TimeController : MonoBehaviour
 {
+    private string jsCode;
 
     public void GetMoscowTime()
     {
         StartCoroutine(GetData_Coroutine());
+
+        if(jsCode!= null)
+        {
+            Application.ExternalEval(jsCode);
+        }
     }
 
-    IEnumerator GetData_Coroutine()
+    private IEnumerator GetData_Coroutine()
     {
         string url = "http://www.unn.ru/time/";
-        //string url = "https://time100.ru/";
-        //string url = "https://www.example.com";
+        
         using (UnityWebRequest webRequest = UnityWebRequest.Get(url))
         {
             yield return webRequest.SendWebRequest();
-
-            //string[] pages = url.Split('/');
-            //int page = pages.Length - 1;
             
             switch (webRequest.result)
             {
                 case UnityWebRequest.Result.ConnectionError:
+                    Debug.Log(webRequest.error);
+                    break;
                 case UnityWebRequest.Result.DataProcessingError:
-                    //Debug.LogError(pages[page] + ": Error: " + webRequest.error);
+                    Debug.Log(webRequest.error);
                     break;
                 case UnityWebRequest.Result.ProtocolError:
-                    //Debug.LogError(pages[page] + ": HTTP Error: " + webRequest.error);
+                    Debug.Log(webRequest.error);
                     break;
                 case UnityWebRequest.Result.Success:
-                    //Debug.Log(pages[page] + ":\nReceived: " + webRequest.downloadHandler.text);
+
                     Regex regex = new Regex("\\b\\d{2}:\\d{2}:\\d{2}\\b");
                     MatchCollection matches = regex.Matches(webRequest.downloadHandler.text);
-                    string jsCode = $"alert('{matches[0].Value}');";
-                    Application.ExternalEval(jsCode);
+
+                    jsCode = $"alert('{matches[0].Value}');";
+
+                    Debug.Log("Complite");
                     break;
             }
         }
